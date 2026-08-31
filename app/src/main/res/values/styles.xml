@@ -1,0 +1,47 @@
+<resources>
+    <!-- Строгая палитра: графит + глубокий бирюзовый акцент -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">#1C1C1E</item>
+        <item name="colorPrimaryVariant">#000000</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#00695c</item>
+        <item name="android:statusBarColor">#1C1C1E</item>
+        <item name="android:windowBackground">#F5F5F7</item>
+    </style>
+
+    <style name="LargeNumberPicker" parent="Theme.MaterialComponents.Light">
+        <item name="android:textSize">36sp</item>
+        <item name="colorControlNormal">#E0E0E0</item>
+        <item name="android:textColorPrimary">#1A1A1A</item>
+    </style>
+    
+    <style name="SectionTitle">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">#8E8E93</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:layout_marginTop">24dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:layout_marginStart">24dp</item>
+    </style>
+    
+    <!-- ИСПРАВЛЕННЫЙ Стиль для кнопок предпросмотра фото -->
+    <style name="PreviewButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAllCaps">false</item>
+        
+        <!-- Убираем скрытые отступы MaterialButton, которые резали низ -->
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:minHeight">64dp</item>
+        
+        <!-- Запрещаем перенос текста на новую строку -->
+        <item name="android:maxLines">1</item>
+    </style>
+</resources>
