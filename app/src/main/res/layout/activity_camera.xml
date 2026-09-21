@@ -1,33 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000">
 
+    <!-- ===================================================== -->
+    <!-- КАМЕРА -->
+    <!-- ===================================================== -->
+
     <androidx.camera.view.PreviewView
         android:id="@+id/previewView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
+
+
+    <!-- ===================================================== -->
+    <!-- OCR OVERLAY -->
+    <!-- ===================================================== -->
 
     <com.example.myfirstapp.OcrOverlayView
         android:id="@+id/ocrOverlay"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
-    <!-- РАМКА-ПРИЦЕЛ: полупрозрачный прямоугольник по центру -->
+
+    <!-- ===================================================== -->
+    <!-- РАМКА -->
+    <!-- ===================================================== -->
+
     <View
         android:id="@+id/viewFinder"
         android:layout_width="match_parent"
         android:layout_height="180dp"
         android:layout_gravity="center"
         android:layout_marginHorizontal="24dp"
-        android:background="@drawable/viewfinder_bg"/>
+        android:background="@drawable/viewfinder_bg" />
 
-    <!-- Инструкция над рамкой -->
+
+    <!-- ===================================================== -->
+    <!-- ИНСТРУКЦИЯ -->
+    <!-- ===================================================== -->
+
     <TextView
+        android:id="@+id/tvCameraInstruction"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:layout_marginHorizontal="24dp"
         android:layout_marginBottom="220dp"
         android:gravity="center"
         android:text="Поместите табло счётчика в рамку"
@@ -37,48 +58,68 @@
         android:shadowColor="#000000"
         android:shadowDx="1"
         android:shadowDy="1"
-        android:shadowRadius="2"/>
+        android:shadowRadius="2" />
+
+
+    <!-- ===================================================== -->
+    <!-- ФОТО ПОСЛЕ СЪЁМКИ -->
+    <!-- ДОЛЖНО БЫТЬ ВЫШЕ КАМЕРЫ, РАМКИ И OCR -->
+    <!-- НО НИЖЕ ПАНЕЛЕЙ УПРАВЛЕНИЯ -->
+    <!-- ===================================================== -->
 
     <ImageView
         android:id="@+id/ivPhotoPreview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#000000"
         android:scaleType="fitCenter"
-        android:visibility="gone"
-        android:background="#000000"/>
+        android:visibility="gone" />
 
-    <!-- Верхняя панель -->
+
+    <!-- ===================================================== -->
+    <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
+    <!-- ===================================================== -->
+
     <LinearLayout
+        android:id="@+id/topCameraBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="top"
         android:orientation="horizontal"
-        android:padding="16dp"
-        android:layout_gravity="top">
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/btnCancel"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:gravity="center"
             android:text="✕"
-            android:textSize="24sp"
             android:textColor="#FFFFFF"
-            android:background="?attr/selectableItemBackgroundBorderless"/>
+            android:textSize="24sp" />
 
-        <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/btnTorch"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:gravity="center"
             android:text="⚡"
-            android:textSize="28sp"
             android:textColor="#FFFFFF"
-            android:background="?attr/selectableItemBackgroundBorderless"/>
+            android:textSize="28sp" />
+
     </LinearLayout>
 
-    <!-- Статус OCR под рамкой -->
+
+    <!-- ===================================================== -->
+    <!-- СТАТУС OCR -->
+    <!-- ===================================================== -->
+
     <TextView
         android:id="@+id/tvOcrStatus"
         android:layout_width="wrap_content"
@@ -90,22 +131,102 @@
         android:paddingVertical="8dp"
         android:text="Наведите на цифры счётчика"
         android:textColor="#FFFFFF"
-        android:textSize="16sp"/>
+        android:textSize="16sp" />
 
-    <!-- Кнопка спуска -->
+
+    <!-- ===================================================== -->
+    <!-- КНОПКА СЪЁМКИ -->
+    <!-- ===================================================== -->
+
     <LinearLayout
         android:id="@+id/layoutCapture"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
-        android:orientation="vertical"
         android:gravity="center"
+        android:orientation="vertical"
         android:paddingBottom="32dp">
 
         <ImageButton
             android:id="@+id/btnCapture"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:background="@drawable/btn_capture_bg"/>
+            android:background="@drawable/btn_capture_bg"
+            android:contentDescription="Сделать фото" />
+
     </LinearLayout>
+
+
+    <!-- ===================================================== -->
+    <!-- ПАНЕЛЬ ПОСЛЕ ФОТО -->
+    <!-- ===================================================== -->
+
+    <LinearLayout
+        android:id="@+id/layoutPreview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#D9000000"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="20dp"
+        android:visibility="gone">
+
+        <!-- ПОВОРОТ -->
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRotate"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginEnd="10dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
+            android:text="↻"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp"
+            android:minWidth="0dp"
+            app:backgroundTint="#3A3A3C"
+            app:cornerRadius="14dp" />
+
+
+        <!-- ПЕРЕСЪЁМКА -->
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRetake"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="6dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Переснять"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:minHeight="0dp"
+            app:backgroundTint="#3A3A3C"
+            app:cornerRadius="14dp" />
+
+
+        <!-- ПОДТВЕРДИТЬ -->
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnConfirm"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="✓  Подтвердить"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:minHeight="0dp"
+            app:backgroundTint="#00695C"
+            app:cornerRadius="14dp" />
+
+    </LinearLayout>
+
 </FrameLayout>

@@ -13,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewParent;
 import android.widget.OverScroller;
 
 public class WheelView extends View {
@@ -35,8 +36,9 @@ public class WheelView extends View {
     private Paint separatorPaint;
     private Paint shadowPaint;
     private Paint glossPaint;
-    private Paint windowPaint;      // вынесено из onDraw
-    private Paint highlightPaint;   // вынесено из onDraw
+    private Paint windowPaint;
+    private Paint highlightPaint;
+    private Paint blackFramePaint;
 
     private RectF frameRect = new RectF();
     private RectF windowRect = new RectF();
@@ -49,62 +51,180 @@ public class WheelView extends View {
         init(context);
     }
 
-    public WheelView(Context context, AttributeSet attrs) {
+    public WheelView(
+            Context context,
+            AttributeSet attrs
+    ) {
         super(context, attrs);
         init(context);
     }
 
-    public WheelView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public WheelView(
+            Context context,
+            AttributeSet attrs,
+            int defStyleAttr
+    ) {
         super(context, attrs, defStyleAttr);
         init(context);
     }
 
     private void init(Context context) {
 
-        scroller = new OverScroller(context);
+        scroller =
+                new OverScroller(context);
 
-        touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        touchSlop =
+                ViewConfiguration
+                        .get(context)
+                        .getScaledTouchSlop();
 
-        textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        textPaint.setColor(Color.parseColor("#202020"));
-        textPaint.setTextAlign(Paint.Align.CENTER);
-        textPaint.setTypeface(Typeface.MONOSPACE);
-        textPaint.setFakeBoldText(true);
+        textPaint =
+                new Paint(
+                        Paint.ANTI_ALIAS_FLAG
+                );
 
-        framePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        textPaint.setColor(
+                Color.parseColor("#202020")
+        );
 
-        borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        borderPaint.setStyle(Paint.Style.STROKE);
-        borderPaint.setStrokeWidth(dp(2));
-        borderPaint.setColor(Color.parseColor("#909090"));
+        textPaint.setTextAlign(
+                Paint.Align.CENTER
+        );
 
-        separatorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        separatorPaint.setColor(Color.parseColor("#5A5A5A"));
-        separatorPaint.setStrokeWidth(dp(2));
+        textPaint.setTypeface(
+                Typeface.MONOSPACE
+        );
 
-        shadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        textPaint.setFakeBoldText(
+                true
+        );
 
-        glossPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-        // Инициализация вспомогательных Paint (раньше создавались в onDraw)
-        windowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        highlightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        framePaint =
+                new Paint(
+                        Paint.ANTI_ALIAS_FLAG
+                );
 
-        setValue(0, false);
+
+        borderPaint =
+                new Paint(
+                        Paint.ANTI_ALIAS_FLAG
+                );
+
+        borderPaint.setStyle(
+                Paint.Style.STROKE
+        );
+
+        borderPaint.setStrokeWidth(
+                dp(2)
+        );
+
+        borderPaint.setColor(
+                Color.parseColor("#909090")
+        );
+
+
+        separatorPaint =
+                new Paint(
+                        Paint.ANTI_ALIAS_FLAG
+                );
+
+        separatorPaint.setColor(
+                Color.parseColor("#5A5A5A")
+        );
+
+        separatorPaint.setStrokeWidth(
+                dp(2)
+        );
+
+
+        shadowPaint =
+                new Paint(
+                        Paint.ANTI_ALIAS_FLAG
+                );
+
+
+        glossPaint =
+                new Paint(
+                        Paint.ANTI_ALIAS_FLAG
+                );
+
+
+        windowPaint =
+                new Paint(
+                        Paint.ANTI_ALIAS_FLAG
+                );
+
+
+        highlightPaint =
+                new Paint(
+                        Paint.ANTI_ALIAS_FLAG
+                );
+
+
+        blackFramePaint =
+                new Paint(
+                        Paint.ANTI_ALIAS_FLAG
+                );
+
+        blackFramePaint.setStyle(
+                Paint.Style.STROKE
+        );
+
+        blackFramePaint.setStrokeWidth(
+                dp(2)
+        );
+
+        blackFramePaint.setColor(
+                Color.parseColor("#444444")
+        );
+
+
+        setValue(
+                0,
+                false
+        );
     }
 
-    private float dp(float dp) {
-        return dp * getResources().getDisplayMetrics().density;
+
+    private float dp(float value) {
+
+        return value *
+                getResources()
+                        .getDisplayMetrics()
+                        .density;
     }
+
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+    protected void onSizeChanged(
+            int w,
+            int h,
+            int oldw,
+            int oldh
+    ) {
 
-        super.onSizeChanged(w, h, oldw, oldh);
+        super.onSizeChanged(
+                w,
+                h,
+                oldw,
+                oldh
+        );
 
-        itemHeight = h / 3f;
 
-        textPaint.setTextSize(itemHeight * 0.72f);
+        itemHeight =
+                h / 3f;
+
+
+        if (itemHeight < 1f) {
+            itemHeight = 1f;
+        }
+
+
+        textPaint.setTextSize(
+                itemHeight * 0.72f
+        );
+
 
         frameRect.set(
                 dp(2),
@@ -113,170 +233,307 @@ public class WheelView extends View {
                 h - dp(2)
         );
 
+
         windowRect.set(
                 dp(4),
-                h / 2f - itemHeight / 2f,
+                h / 2f -
+                        itemHeight / 2f,
                 w - dp(4),
-                h / 2f + itemHeight / 2f
+                h / 2f +
+                        itemHeight / 2f
         );
+
 
         updateOffsetFromValue();
     }
 
+
     private void updateOffsetFromValue() {
-        totalOffset = currentValue * itemHeight;
+
+        totalOffset =
+                currentValue *
+                        itemHeight;
     }
 
+
     public int getValue() {
+
         return currentValue;
     }
 
+
     public void setValue(int value) {
-        setValue(value, true);
+
+        setValue(
+                value,
+                true
+        );
     }
 
-    public void setValue(int value, boolean animated) {
 
-        value = wrap(value);
+    public void setValue(
+            int value,
+            boolean animated
+    ) {
 
-        if (!animated) {
+        value =
+                wrap(value);
 
-            currentValue = value;
-            updateOffsetFromValue();
-            invalidate();
+
+        if (itemHeight <= 0) {
+
+            currentValue =
+                    value;
+
             return;
         }
 
-        float target = value * itemHeight;
+
+        if (!animated) {
+
+            if (!scroller.isFinished()) {
+                scroller.abortAnimation();
+            }
+
+            currentValue =
+                    value;
+
+            updateOffsetFromValue();
+
+            invalidate();
+
+            return;
+        }
+
+
+        float target =
+                value *
+                        itemHeight;
+
+
+        if (!scroller.isFinished()) {
+
+            scroller.abortAnimation();
+        }
+
 
         scroller.startScroll(
                 0,
                 (int) totalOffset,
                 0,
-                (int) (target - totalOffset),
+                (int) (
+                        target -
+                                totalOffset
+                ),
                 250
         );
 
+
+        currentValue =
+                value;
+
+
         invalidate();
     }
+
 
     private int wrap(int value) {
 
         value %= DIGITS;
 
-        if (value < 0)
+        if (value < 0) {
             value += DIGITS;
+        }
 
         return value;
     }
 
+
     private void updateCurrentValue() {
 
-        int index = Math.round(totalOffset / itemHeight);
+        if (itemHeight <= 0) {
+            return;
+        }
 
-        currentValue = wrap(index);
+
+        int index =
+                Math.round(
+                        totalOffset /
+                                itemHeight
+                );
+
+
+        currentValue =
+                wrap(index);
     }
+
 
     private void snap() {
 
+        if (itemHeight <= 0) {
+            return;
+        }
+
+
         float target =
-                Math.round(totalOffset / itemHeight) * itemHeight;
+                Math.round(
+                        totalOffset /
+                                itemHeight
+                ) *
+                        itemHeight;
+
 
         scroller.startScroll(
                 0,
                 (int) totalOffset,
                 0,
-                (int) (target - totalOffset),
+                (int) (
+                        target -
+                                totalOffset
+                ),
                 180
         );
+
 
         invalidate();
     }
 
-    @Override
-    public void computeScroll() {
 
-        if (scroller.computeScrollOffset()) {
+    private void allowParentIntercept(
+            boolean allow
+    ) {
 
-            totalOffset = scroller.getCurrY();
+        ViewParent parent =
+                getParent();
 
-            updateCurrentValue();
 
-            invalidate();
+        while (parent != null) {
 
-        } else {
+            parent.requestDisallowInterceptTouchEvent(
+                    !allow
+            );
 
-            if (!dragging) {
-
-                float target =
-                        Math.round(totalOffset / itemHeight) * itemHeight;
-
-                if (Math.abs(target - totalOffset) > 1f) {
-
-                    snap();
-
-                } else {
-
-                    totalOffset = target;
-                    updateCurrentValue();
-                }
-            }
+            parent =
+                    parent.getParent();
         }
     }
 
+
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean onTouchEvent(
+            MotionEvent event
+    ) {
 
         if (velocityTracker == null) {
-            velocityTracker = VelocityTracker.obtain();
+
+            velocityTracker =
+                    VelocityTracker.obtain();
         }
 
-        velocityTracker.addMovement(event);
 
-        switch (event.getActionMasked()) {
+        velocityTracker.addMovement(
+                event
+        );
+
+
+        switch (
+                event.getActionMasked()
+        ) {
 
             case MotionEvent.ACTION_DOWN:
 
+                /*
+                 * Ключевое исправление:
+                 * ScrollView больше не перехватывает
+                 * вертикальный жест барабана.
+                 */
+                allowParentIntercept(
+                        false
+                );
+
+
                 if (!scroller.isFinished()) {
+
                     scroller.abortAnimation();
                 }
 
-                dragging = false;
-                lastY = event.getY();
+
+                dragging =
+                        false;
+
+
+                lastY =
+                        event.getY();
+
 
                 return true;
 
+
             case MotionEvent.ACTION_MOVE:
 
-                float dy = event.getY() - lastY;
+                float dy =
+                        event.getY() -
+                                lastY;
+
 
                 if (!dragging) {
 
-                    if (Math.abs(dy) > touchSlop) {
-                        dragging = true;
+                    if (
+                            Math.abs(dy) >
+                                    touchSlop
+                    ) {
+
+                        dragging =
+                                true;
+
+                        allowParentIntercept(
+                                false
+                        );
+
                     } else {
+
                         return true;
                     }
                 }
 
-                lastY = event.getY();
 
-                // Палец вниз -> цифры вниз, палец вверх -> цифры вверх
-                totalOffset -= dy;
+                lastY =
+                        event.getY();
+
+
+                /*
+                 * Палец вниз → цифры вниз.
+                 * Палец вверх → цифры вверх.
+                 */
+                totalOffset -=
+                        dy;
+
 
                 updateCurrentValue();
 
+
                 invalidate();
+
 
                 return true;
 
+
             case MotionEvent.ACTION_UP:
 
-                velocityTracker.computeCurrentVelocity(1000);
+                velocityTracker.computeCurrentVelocity(
+                        1000
+                );
 
-                float velocityY = velocityTracker.getYVelocity();
 
-                if (Math.abs(velocityY) > 300) {
+                float velocityY =
+                        velocityTracker
+                                .getYVelocity();
+
+
+                if (
+                        Math.abs(velocityY) >
+                                300
+                ) {
 
                     scroller.fling(
                             0,
@@ -296,252 +553,588 @@ public class WheelView extends View {
                     snap();
                 }
 
-                velocityTracker.recycle();
-                velocityTracker = null;
 
-                dragging = false;
+                allowParentIntercept(
+                        true
+                );
+
+
+                velocityTracker.recycle();
+
+                velocityTracker =
+                        null;
+
+
+                dragging =
+                        false;
+
 
                 return true;
+
 
             case MotionEvent.ACTION_CANCEL:
 
                 if (velocityTracker != null) {
+
                     velocityTracker.recycle();
-                    velocityTracker = null;
+
+                    velocityTracker =
+                            null;
                 }
 
-                dragging = false;
+
+                dragging =
+                        false;
+
 
                 snap();
+
+
+                allowParentIntercept(
+                        true
+                );
+
 
                 return true;
         }
 
-        return super.onTouchEvent(event);
+
+        return super.onTouchEvent(
+                event
+        );
     }
 
-    private int getDigit(int offset) {
 
-        int center = Math.round(totalOffset / itemHeight);
+    @Override
+    public void computeScroll() {
 
-        return wrap(center + offset);
+        if (
+                scroller.computeScrollOffset()
+        ) {
+
+            totalOffset =
+                    scroller.getCurrY();
+
+
+            updateCurrentValue();
+
+
+            invalidate();
+
+        } else {
+
+            if (!dragging) {
+
+                float target =
+                        Math.round(
+                                totalOffset /
+                                        itemHeight
+                        ) *
+                                itemHeight;
+
+
+                if (
+                        Math.abs(
+                                target -
+                                        totalOffset
+                        ) > 1f
+                ) {
+
+                    snap();
+
+                } else {
+
+                    totalOffset =
+                            target;
+
+                    updateCurrentValue();
+                }
+            }
+        }
     }
 
-    private float getCenterY(int offset) {
+
+    private int getDigit(
+            int offset
+    ) {
+
+        int center =
+                Math.round(
+                        totalOffset /
+                                itemHeight
+                );
+
+
+        return wrap(
+                center +
+                        offset
+        );
+    }
+
+
+    private float getCenterY(
+            int offset
+    ) {
 
         float nearest =
-                Math.round(totalOffset / itemHeight) * itemHeight;
+                Math.round(
+                        totalOffset /
+                                itemHeight
+                ) *
+                        itemHeight;
+
 
         float remain =
-                totalOffset - nearest;
+                totalOffset -
+                        nearest;
 
-        return getHeight() / 2f
-                + offset * itemHeight
-                - remain;
+
+        return getHeight() /
+                2f
+                +
+                offset *
+                        itemHeight
+                -
+                remain;
     }
 
-    private float getScale(float y) {
+
+    private float getScale(
+            float y
+    ) {
 
         float distance =
-                Math.abs(y - getHeight() / 2f);
+                Math.abs(
+                        y -
+                                getHeight() /
+                                        2f
+                );
+
 
         float k =
-                1f - distance / (getHeight() / 2f);
+                1f -
+                        distance /
+                                (
+                                        getHeight() /
+                                                2f
+                                );
 
-        if (k < 0)
+
+        if (k < 0) {
             k = 0;
+        }
 
-        return 0.45f + k * 0.55f;
+
+        return 0.45f +
+                k *
+                        0.55f;
     }
 
-    private int getAlpha(float y) {
+
+    private int getAlpha(
+            float y
+    ) {
 
         float distance =
-                Math.abs(y - getHeight() / 2f);
+                Math.abs(
+                        y -
+                                getHeight() /
+                                        2f
+                );
+
 
         float k =
-                1f - distance / (getHeight() / 2f);
+                1f -
+                        distance /
+                                (
+                                        getHeight() /
+                                                2f
+                                );
 
-        if (k < 0)
+
+        if (k < 0) {
             k = 0;
+        }
 
-        return (int) (60 + k * 195);
+
+        return (int)
+                (
+                        60 +
+                                k *
+                                        195
+                );
     }
 
-    // ---- УДАЛЁН getShiftX – больше не используем горизонтальное смещение ----
 
-    private void drawDigit(Canvas canvas, int digit, float centerY) {
+    private void drawDigit(
+            Canvas canvas,
+            int digit,
+            float centerY
+    ) {
 
-        float scale = getScale(centerY);
+        float scale =
+                getScale(
+                        centerY
+                );
 
-        textPaint.setAlpha(getAlpha(centerY));
 
-        textPaint.setTextSize(itemHeight * 0.72f * scale);
+        textPaint.setAlpha(
+                getAlpha(
+                        centerY
+                )
+        );
 
-        // Цифры теперь всегда по центру по горизонтали (без смещения)
-        float x = getWidth() / 2f;
+
+        textPaint.setTextSize(
+                itemHeight *
+                        0.72f *
+                        scale
+        );
+
+
+        float x =
+                getWidth() /
+                        2f;
+
 
         canvas.drawText(
-                String.valueOf(digit),
+                String.valueOf(
+                        digit
+                ),
                 x,
-                centerY - (textPaint.ascent() + textPaint.descent()) / 2,
+                centerY -
+                        (
+                                textPaint.ascent() +
+                                        textPaint.descent()
+                        ) /
+                                2,
                 textPaint
         );
     }
 
+
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(
+            Canvas canvas
+    ) {
 
-        super.onDraw(canvas);
+        super.onDraw(
+                canvas
+        );
 
-        int w = getWidth();
-        int h = getHeight();
 
-        float radius = dp(12);
+        int w =
+                getWidth();
 
-        // =====================================================
-        // Корпус барабана
-        // =====================================================
+
+        int h =
+                getHeight();
+
+
+        float radius =
+                dp(12);
+
 
         framePaint.setShader(
                 new LinearGradient(
-                        0, 0, 0, h,
+                        0,
+                        0,
+                        0,
+                        h,
                         new int[]{
-                                Color.parseColor("#D5D5D5"),
-                                Color.parseColor("#F7F7F7"),
-                                Color.parseColor("#CFCFCF")
+                                Color.parseColor(
+                                        "#D5D5D5"
+                                ),
+                                Color.parseColor(
+                                        "#F7F7F7"
+                                ),
+                                Color.parseColor(
+                                        "#CFCFCF"
+                                )
                         },
-                        new float[]{0f, 0.5f, 1f},
+                        new float[]{
+                                0f,
+                                0.5f,
+                                1f
+                        },
                         Shader.TileMode.CLAMP
                 )
         );
 
-        canvas.drawRoundRect(frameRect, radius, radius, framePaint);
-        canvas.drawRoundRect(frameRect, radius, radius, borderPaint);
 
-        // =====================================================
-        // Центральное окно
-        // =====================================================
+        canvas.drawRoundRect(
+                frameRect,
+                radius,
+                radius,
+                framePaint
+        );
+
+
+        canvas.drawRoundRect(
+                frameRect,
+                radius,
+                radius,
+                borderPaint
+        );
+
 
         windowPaint.setShader(
                 new LinearGradient(
-                        0, windowRect.top, 0, windowRect.bottom,
+                        0,
+                        windowRect.top,
+                        0,
+                        windowRect.bottom,
                         new int[]{
-                                Color.parseColor("#ECECEC"),
+                                Color.parseColor(
+                                        "#ECECEC"
+                                ),
                                 Color.WHITE,
-                                Color.parseColor("#E6E6E6")
+                                Color.parseColor(
+                                        "#E6E6E6"
+                                )
                         },
                         null,
                         Shader.TileMode.CLAMP
                 )
         );
 
-        canvas.drawRoundRect(windowRect, dp(6), dp(6), windowPaint);
 
-        // Чёрная рамка окна
-        Paint blackFrame = new Paint(Paint.ANTI_ALIAS_FLAG);
-        blackFrame.setStyle(Paint.Style.STROKE);
-        blackFrame.setStrokeWidth(dp(2));
-        blackFrame.setColor(Color.parseColor("#444444"));
-        canvas.drawRoundRect(windowRect, dp(6), dp(6), blackFrame);
+        canvas.drawRoundRect(
+                windowRect,
+                dp(6),
+                dp(6),
+                windowPaint
+        );
 
-        // =====================================================
-        // Верхняя тень
-        // =====================================================
+
+        canvas.drawRoundRect(
+                windowRect,
+                dp(6),
+                dp(6),
+                blackFramePaint
+        );
+
 
         shadowPaint.setShader(
                 new LinearGradient(
-                        0, 0, 0, h * 0.22f,
+                        0,
+                        0,
+                        0,
+                        h * 0.22f,
                         new int[]{
-                                Color.argb(120, 0, 0, 0),
-                                Color.argb(0, 0, 0, 0)
+                                Color.argb(
+                                        120,
+                                        0,
+                                        0,
+                                        0
+                                ),
+                                Color.argb(
+                                        0,
+                                        0,
+                                        0,
+                                        0
+                                )
                         },
                         null,
                         Shader.TileMode.CLAMP
                 )
         );
-        canvas.drawRect(0, 0, w, h * 0.22f, shadowPaint);
 
-        // =====================================================
-        // Нижняя тень
-        // =====================================================
+
+        canvas.drawRect(
+                0,
+                0,
+                w,
+                h * 0.22f,
+                shadowPaint
+        );
+
 
         shadowPaint.setShader(
                 new LinearGradient(
-                        0, h, 0, h * 0.78f,
+                        0,
+                        h,
+                        0,
+                        h * 0.78f,
                         new int[]{
-                                Color.argb(120, 0, 0, 0),
-                                Color.argb(0, 0, 0, 0)
+                                Color.argb(
+                                        120,
+                                        0,
+                                        0,
+                                        0
+                                ),
+                                Color.argb(
+                                        0,
+                                        0,
+                                        0,
+                                        0
+                                )
                         },
                         null,
                         Shader.TileMode.CLAMP
                 )
         );
-        canvas.drawRect(0, h * 0.78f, w, h, shadowPaint);
 
-        // =====================================================
-        // Блик
-        // =====================================================
+
+        canvas.drawRect(
+                0,
+                h * 0.78f,
+                w,
+                h,
+                shadowPaint
+        );
+
 
         glossPaint.setShader(
                 new LinearGradient(
-                        0, 0, w, 0,
+                        0,
+                        0,
+                        w,
+                        0,
                         new int[]{
-                                Color.argb(80, 255, 255, 255),
-                                Color.argb(10, 255, 255, 255),
-                                Color.argb(80, 255, 255, 255)
+                                Color.argb(
+                                        80,
+                                        255,
+                                        255,
+                                        255
+                                ),
+                                Color.argb(
+                                        10,
+                                        255,
+                                        255,
+                                        255
+                                ),
+                                Color.argb(
+                                        80,
+                                        255,
+                                        255,
+                                        255
+                                )
                         },
-                        new float[]{0f, 0.5f, 1f},
+                        new float[]{
+                                0f,
+                                0.5f,
+                                1f
+                        },
                         Shader.TileMode.CLAMP
                 )
         );
-        canvas.drawRoundRect(frameRect, radius, radius, glossPaint);
 
-        // =====================================================
-        // Линии окна (верхняя и нижняя)
-        // =====================================================
 
-        canvas.drawLine(0, windowRect.top, w, windowRect.top, separatorPaint);
-        canvas.drawLine(0, windowRect.bottom, w, windowRect.bottom, separatorPaint);
+        canvas.drawRoundRect(
+                frameRect,
+                radius,
+                radius,
+                glossPaint
+        );
 
-        // =====================================================
-        // Отрисовка цифр (без горизонтального смещения и вращения)
-        // =====================================================
 
-        for (int i = -4; i <= 4; i++) {
+        canvas.drawLine(
+                0,
+                windowRect.top,
+                w,
+                windowRect.top,
+                separatorPaint
+        );
 
-            float y = getCenterY(i);
 
-            if (y < -itemHeight || y > h + itemHeight)
+        canvas.drawLine(
+                0,
+                windowRect.bottom,
+                w,
+                windowRect.bottom,
+                separatorPaint
+        );
+
+
+        for (
+                int i = -4;
+                i <= 4;
+                i++
+        ) {
+
+            float y =
+                    getCenterY(
+                            i
+                    );
+
+
+            if (
+                    y < -itemHeight ||
+                            y >
+                                    h +
+                                            itemHeight
+            ) {
+
                 continue;
+            }
+
 
             canvas.save();
 
-            // Только вертикальный масштаб (перспектива), без смещения по X и без поворота
-            float scale = getScale(y);
-            canvas.scale(1f, scale, w / 2f, y);
 
-            drawDigit(canvas, getDigit(i), y);
+            float scale =
+                    getScale(
+                            y
+                    );
+
+
+            canvas.scale(
+                    1f,
+                    scale,
+                    w / 2f,
+                    y
+            );
+
+
+            drawDigit(
+                    canvas,
+                    getDigit(i),
+                    y
+            );
+
 
             canvas.restore();
         }
 
-        // =====================================================
-        // Центральная подсветка
-        // =====================================================
 
         highlightPaint.setShader(
                 new LinearGradient(
-                        0, windowRect.top, 0, windowRect.bottom,
+                        0,
+                        windowRect.top,
+                        0,
+                        windowRect.bottom,
                         new int[]{
-                                Color.argb(20, 255, 255, 255),
-                                Color.argb(0, 255, 255, 255),
-                                Color.argb(40, 0, 0, 0)
+                                Color.argb(
+                                        20,
+                                        255,
+                                        255,
+                                        255
+                                ),
+                                Color.argb(
+                                        0,
+                                        255,
+                                        255,
+                                        255
+                                ),
+                                Color.argb(
+                                        40,
+                                        0,
+                                        0,
+                                        0
+                                )
                         },
                         null,
                         Shader.TileMode.CLAMP
                 )
         );
-        canvas.drawRoundRect(windowRect, dp(6), dp(6), highlightPaint);
+
+
+        canvas.drawRoundRect(
+                windowRect,
+                dp(6),
+                dp(6),
+                highlightPaint
+        );
     }
 }
